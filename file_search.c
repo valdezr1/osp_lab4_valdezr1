@@ -6,11 +6,27 @@
 #include <dirent.h>
 
 int visitDir(char* directory){
-
 	
+	DIR* dirPtr;
+	struct dirent *direntPtr;
+
 	printf("%s\n", directory);
 	printf("visitDir called\n");
 		
+	dirPtr = opendir(directory);
+	
+	if(dirPtr == NULL){
+		//printf("Cannot open directory\n");
+		return 0;
+	}
+	
+	
+	while((direntPtr = readdir(dirPtr)) != NULL){
+		printf("%s\n", direntPtr -> d_name);
+	}
+
+
+	
 	return 0;
 
 }
