@@ -22,7 +22,12 @@ int visitDir(char* directory){
 	
 	
 	while((direntPtr = readdir(dirPtr)) != NULL){
-		printf("%s\n", direntPtr -> d_name);
+		if(direntPtr -> d_type == DT_DIR){
+			printf("%s:\n", direntPtr -> d_name);
+		}
+		else{
+			printf("%s\n", direntPtr -> d_name);
+		}
 	}
 
 
