@@ -2,6 +2,18 @@
 #include <stdlib.h>
 #include <signal.h>
 #include <string.h>
+#include <sys/types.h>
+#include <dirent.h>
+
+int visitDir(char* directory){
+
+	
+	printf("%s\n", directory);
+	printf("visitDir called\n");
+		
+	return 0;
+
+}
 
 int main(int argc, char** argv){
 	
@@ -13,6 +25,10 @@ int main(int argc, char** argv){
 			printf("Starting Directory Argument is invalid\n");
 			return 0;
 		}
+		
+		visitDir(argv[2]);
+
+		
 	}
 	else{
 		printf("Invalid Number of Arguments \n");
