@@ -6,37 +6,42 @@
 #include <dirent.h>
 #include <time.h>
 
-int visitDir(char* term, char* directory){
-	
+// Desc: Function to print any children files/directories of the directory passed in containing the term
+void visitDir(char* term, char* directory){
+	// DIR pointer to account for return value of opendir
 	DIR* dirPtr;
+	// Dirent struct pointer to account for readdir return value
 	struct dirent *direntPtr;
 
-	//printf("%s\n", directory);
-	//printf("visitDir called\n");
-		
+	// Opens passed in directory	
 	dirPtr = opendir(directory);
 	
+	// If directory unable to be opened
 	if(dirPtr == NULL){
-		//printf("Cannot open directory\n");
-		return 0;
+		printf("Cannot open directory\n");
+		return;
 	}
-
+	
 	char* dirPath;
 
 	// Iterate through directories in absolute path specified	
 	while((direntPtr = readdir(dirPtr)) != NULL){
+		//Allocates memory for directory name
 		dirPath = malloc(256);
+		//Resets dirPath to be the directory passed in the function
 		strcpy(dirPath, directory);
 
 		//Check to see whether the file is a directory
 		if(direntPtr -> d_type == DT_DIR){
+			//Checks to see if the directory is . or .. to ignore and prevent infinite recursion
 			if(strcmp(".", direntPtr -> d_name)  != 0 && strcmp("..", direntPtr -> d_name) != 0){
+				//Concatinates a '/' and the name of the directory found
 				strcat(dirPath, "/");
 				strcat(dirPath, direntPtr -> d_name);
 				
 				//check if the term is a substring of the name
 				if(strstr(direntPtr -> d_name, term) != NULL){
-					printf("%s:\n", dirPath);
+					printf("%s:\n", dirPath); //appends a ':' to signify directory type
 				}
 
 				//Recursively call function to view inside the directory
@@ -46,43 +51,49 @@ int visitDir(char* term, char* directory){
 		else{
 			//check if the term is a substring of the name
 			if(strstr(direntPtr -> d_name, term) != NULL){
+				//Concats a '/' and the file name
 				strcat(dirPath, "/");
 				strcat(dirPath, direntPtr -> d_name);
 				printf("%s\n", dirPath);
 			}
 		}
+		// Frees dynamically allocated memory
 		free(dirPath);
 	}	
 	
-	return 0;
+	return;
 
 }
 
-int main(int argc, char** argv){
-	
+int main(int argc, char** argv){	
 	if(argc == 3){
-		//printf("Arguments count vaild\n");
-		
 		//Ensuring that the <starting directory> begins with a '/' and doesn't end with a '/' 
 		if (argv[2][0] != '/' || argv[2][strlen(argv[2]) - 1] == '/'){
 			printf("Starting Directory Argument is invalid\n");
 			return 0;
 		}
 		
+		// Saves startTime of function (clocks before function has started)
 		clock_t startTime = clock();
+
+		//Function call passing in search term (param 1) and starting directory (param 2) from argv
 		visitDir(argv[1], argv[2]);
+
+		// Saves endTime of function (clocks when function is finished executing)
 		clock_t endTime = clock();
-
+		
+		// Start and End time difference saved in elapsedTime as seconds
 		double elapsedTime = (double)(endTime - startTime)/ CLOCKS_PER_SEC;
-		elapsedTime = elapsedTime * 1000;
-		printf("Time: %fms\n", elapsedTime);
 
+		// Multiplied by 1000 to account for Milliseconds
+		elapsedTime = elapsedTime * 1000;
+		printf("\nTime: %fms\n", elapsedTime); // Prints as float 
 
 	}
 	else{
+		//Error with number of arguments (not 3)
 		printf("Invalid Number of Arguments \n");
 	}
 
 	return 0;
-
 }
