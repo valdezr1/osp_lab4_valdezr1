@@ -4,6 +4,7 @@
 #include <string.h>
 #include <sys/types.h>
 #include <dirent.h>
+#include <time.h>
 
 int visitDir(char* term, char* directory){
 	
@@ -68,7 +69,14 @@ int main(int argc, char** argv){
 			return 0;
 		}
 		
+		clock_t startTime = clock();
 		visitDir(argv[1], argv[2]);
+		clock_t endTime = clock();
+
+		double elapsedTime = (double)(endTime - startTime)/ CLOCKS_PER_SEC;
+		elapsedTime = elapsedTime * 1000;
+		printf("Time: %fms\n", elapsedTime);
+
 
 	}
 	else{
