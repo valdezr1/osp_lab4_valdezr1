@@ -13,7 +13,8 @@ void visitDir(char* term, char* directory){
 	// Dirent struct pointer to account for readdir return value
 	struct dirent *direntPtr;
 
-	// Opens passed in directory	
+	// Opens passed in directory and takes in path of specified directory
+	// Returns NULL if directory is unable to be opened	
 	dirPtr = opendir(directory);
 	
 	// If directory unable to be opened
@@ -24,7 +25,10 @@ void visitDir(char* term, char* directory){
 	
 	char* dirPath;
 
-	// Iterate through directories in absolute path specified	
+	// Iterate through directories in absolute path specified
+	// readDir takes in opened directory's DIR pointer 
+	// Returns value into a struct dirent pointer (direntPtr)
+	// If dirent pointer value is NULL, end of directory opened	
 	while((direntPtr = readdir(dirPtr)) != NULL){
 		//Allocates memory for directory name
 		dirPath = malloc(256);
