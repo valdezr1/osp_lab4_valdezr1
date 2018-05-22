@@ -20,22 +20,38 @@ int visitDir(char* term, char* directory){
 		return 0;
 	}
 
+	char* dirPath;
+
 	// Iterate through directories in absolute path specified	
 	while((direntPtr = readdir(dirPtr)) != NULL){
+		dirPath = malloc(256);
+		strcpy(dirPath, directory);
+
+		//Check to see whether the file is a directory
 		if(direntPtr -> d_type == DT_DIR){
 			if(strcmp(".", direntPtr -> d_name)  != 0 && strcmp("..", direntPtr -> d_name) != 0){
-				visitDir(term, direntPtr -> d_name);
+				strcat(dirPath, "/");
+				strcat(dirPath, direntPtr -> d_name);
+				
+				//check if the term is a substring of the name
 				if(strstr(direntPtr -> d_name, term) != NULL){
-					printf("%s:\n", direntPtr -> d_name);
+					printf("%s:\n", dirPath);
 				}
+
+				//Recursively call function to view inside the directory
+				visitDir(term, dirPath);
 			}
 		}
 		else{
+			//check if the term is a substring of the name
 			if(strstr(direntPtr -> d_name, term) != NULL){
-				printf("%s\n", direntPtr -> d_name);
+				strcat(dirPath, "/");
+				strcat(dirPath, direntPtr -> d_name);
+				printf("%s\n", dirPath);
 			}
 		}
-	}
+		free(dirPath);
+	}	
 	
 	return 0;
 
