@@ -1,5 +1,5 @@
 # osp_lab4_valdezr1
-Operating Systems Lab 4 | Recursive File Search
+Operating Systems Lab 4 | Recursive File Search <br>
 Executable will take in three arguments:
 1) Executable
 2) Search Term
