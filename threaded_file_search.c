@@ -22,6 +22,11 @@ pthread_t threads[4];
 char* paths[2000];
 size_t count = 0;
 
+struct range {
+	size_t start;
+	size_t end;
+};
+
 int main(int argc, char **argv)
 {
 	if(argc != 3)
@@ -50,10 +55,48 @@ int main(int argc, char **argv)
 	struct timeval start, end;
 	gettimeofday(&start, NULL);
 
-	pthread_create(&threads[0], NULL, thread_file_search, argv[2]);
+	recur_file_search(argv[2]);
 
-	if(pthread_join(threads[0], NULL)){
-		printf("Error in joining thread\n");
+	int increment;
+	if(count < 4){
+		increment = count % 4;
+	}       
+	else{
+		increment = count / 4;
+	}
+
+	struct range rOne;
+	rOne.start = 0;
+	rOne.end = increment;
+
+	struct range rTwo;
+	rTwo.start = rOne.end + increment;
+	rTwo.end = rTwo.start + increment;
+
+	struct range rThree;
+	rThree.start = rTwo.end + increment;
+	rThree.end = rThree.start + increment;
+
+	struct range rFour;
+	rFour.start = rThree.end + increment;
+	rFour.end = count - 1;
+
+	struct range* rOnePtr = &rOne;
+	struct range* rTwoPtr = &rTwo;
+	struct range* rThreePtr = &rThree;
+	struct range* rFourPtr = &rFour;
+
+	//Create new threads (probably better to do this in a loop...) that passes
+	//in their corresponding struct
+	pthread_create(&threads[0], NULL, thread_file_search, rOnePtr);
+	pthread_create(&threads[1], NULL, thread_file_search, rTwoPtr);
+	pthread_create(&threads[2], NULL, thread_file_search, rThreePtr);
+	pthread_create(&threads[3], NULL, thread_file_search, rFourPtr);
+
+	for(int i = 0; i < 4; i++){
+		if(pthread_join(threads[i], NULL)){
+			printf("Error in joining thread\n");
+		}
 	}
 
 
@@ -61,19 +104,26 @@ int main(int argc, char **argv)
 	printf("Time: %ld\n", (end.tv_sec * 1000000 + end.tv_usec)
 			- (start.tv_sec * 1000000 + start.tv_usec));
 
-	printf("-----------------------\n");
-	for(int i = 0; i < count; i++){
-		printf("%s\n", paths[i]);
-	}
-
 	pthread_exit(NULL);
+
+	for(int i = 0; i < count; i++){
+		free(paths[i]);
+	}
 
 	return 0;
 }
 
 void* thread_file_search(void* arg){
-	char * file = (char*)arg;
-	recur_file_search(file);
+	struct range* r = (struct range*)arg;
+	if(r->start < count){
+		for(int i = r->start; i < r->end; i++){
+			if(i < count){
+				if(strstr(paths[i], search_term)){
+					printf("%s\n", paths[i]);
+				}
+			}
+		}
+	}
 }
 
 //This function takes a path to recurse on, searching for mathes to the
@@ -110,7 +160,7 @@ void recur_file_search(char *file)
 			//Add to global array of paths. First allocate mem, then cpy the str
 			paths[count] = malloc(sizeof(char)*255);
 			strcpy(paths[count], file);
-			printf("%s\n", file);
+			//printf("%s\n", file);
 		}
 
 		//no need to close d (we can't, it is NULL!)
@@ -119,8 +169,9 @@ void recur_file_search(char *file)
 
 	//we have a directory, not a file, so check if its name
 	// matches the search term
-	if(strstr(file, search_term) != NULL)
-		printf("%s/\n", file);
+	if(strstr(file, search_term) != NULL) {
+		//printf("%s/\n", file);
+	}
 
 	//call recur_file_search for each file in d
 	//readdir "discovers" all the files in d, one by one and we
