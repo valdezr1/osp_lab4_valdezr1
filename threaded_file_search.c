@@ -18,6 +18,10 @@ const char *search_term;
 //share four threads globally (rather than passing the same array recursively)
 pthread_t threads[4];
 
+//array of strings that would contain the paths (MAXED to 1000)
+char* paths[2000];
+size_t count = 0;
+
 int main(int argc, char **argv)
 {
 	if(argc != 3)
@@ -56,6 +60,11 @@ int main(int argc, char **argv)
 	gettimeofday(&end, NULL);
 	printf("Time: %ld\n", (end.tv_sec * 1000000 + end.tv_usec)
 			- (start.tv_sec * 1000000 + start.tv_usec));
+
+	printf("-----------------------\n");
+	for(int i = 0; i < count; i++){
+		printf("%s\n", paths[i]);
+	}
 
 	pthread_exit(NULL);
 
@@ -97,8 +106,12 @@ void recur_file_search(char *file)
 
 		//nothing weird happened, check if the file contains the search term
 		// and if so print the file to the screen (with full path)
-		if(strstr(file, search_term) != NULL)
+		if(strstr(file, search_term) != NULL){
+			//Add to global array of paths. First allocate mem, then cpy the str
+			paths[count] = malloc(sizeof(char)*255);
+			strcpy(paths[count], file);
 			printf("%s\n", file);
+		}
 
 		//no need to close d (we can't, it is NULL!)
 		return;
@@ -133,6 +146,10 @@ void recur_file_search(char *file)
 			strncpy(next_file_str + strlen(file) + 1, \
 					cur_file->d_name, \
 					strlen(cur_file->d_name) + 1);
+
+			paths[count] = malloc(sizeof(char)*255);
+			strcpy(paths[count], next_file_str);
+			count++;
 
 			//recurse on the file
 			recur_file_search(next_file_str);
