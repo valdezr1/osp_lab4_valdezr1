@@ -54,9 +54,12 @@ int main(int argc, char **argv)
 	//start timer for recursive search
 	struct timeval start, end;
 	gettimeofday(&start, NULL);
-
+	
+	//Call the recursive file search to populate paths array and get all of the paths visited
 	recur_file_search(argv[2]);
 
+	//Increment used to find bounds for thread logic. If count is less than 4, only one thread
+	// Will be used to visit the children
 	int increment;
 	if(count < 4){
 		increment = count % 4;
@@ -65,10 +68,12 @@ int main(int argc, char **argv)
 		increment = count / 4;
 	}
 
+	//Created range structs to specify each thread's range that they will seek within the array
 	struct range rOne;
-	rOne.start = 0;
-	rOne.end = increment;
+	rOne.start = 0; //Begins at 0th index
+	rOne.end = increment; // Goes up until the increment
 
+	//Past values used while adding increment to set new ranges for additional structs
 	struct range rTwo;
 	rTwo.start = rOne.end + increment;
 	rTwo.end = rTwo.start + increment;
@@ -81,6 +86,7 @@ int main(int argc, char **argv)
 	rFour.start = rThree.end + increment;
 	rFour.end = count - 1;
 
+	//Pointers used to allow structs to be passed in to the pthread_create function
 	struct range* rOnePtr = &rOne;
 	struct range* rTwoPtr = &rTwo;
 	struct range* rThreePtr = &rThree;
@@ -88,24 +94,29 @@ int main(int argc, char **argv)
 
 	//Create new threads (probably better to do this in a loop...) that passes
 	//in their corresponding struct
+	//pthread_create takes in the address of a thread (which would be within 
+	//the threads array) and thread attributes (usually NULL), the function
+	//pointer to call, and the parameters of the function (as void* args)
 	pthread_create(&threads[0], NULL, thread_file_search, rOnePtr);
 	pthread_create(&threads[1], NULL, thread_file_search, rTwoPtr);
 	pthread_create(&threads[2], NULL, thread_file_search, rThreePtr);
 	pthread_create(&threads[3], NULL, thread_file_search, rFourPtr);
 
+	//Join the threads after all threads finished and wait for all to finish
 	for(int i = 0; i < 4; i++){
 		if(pthread_join(threads[i], NULL)){
 			printf("Error in joining thread\n");
 		}
 	}
 
-
 	gettimeofday(&end, NULL);
 	printf("Time: %ld\n", (end.tv_sec * 1000000 + end.tv_usec)
 			- (start.tv_sec * 1000000 + start.tv_usec));
 
+	//Exit the thread
 	pthread_exit(NULL);
 
+	//Deallocate memory after array has been used
 	for(int i = 0; i < count; i++){
 		free(paths[i]);
 	}
@@ -113,8 +124,12 @@ int main(int argc, char **argv)
 	return 0;
 }
 
+//Function pointer takes in void * and casts arguemnt appropriately
+//(expecting a struct range). Called when new thread is created.
 void* thread_file_search(void* arg){
 	struct range* r = (struct range*)arg;
+	//Given appropriate range, iterate through array of paths and
+	//print paths that contain a substring of the search_term
 	if(r->start < count){
 		for(int i = r->start; i < r->end; i++){
 			if(i < count){
@@ -160,17 +175,11 @@ void recur_file_search(char *file)
 			//Add to global array of paths. First allocate mem, then cpy the str
 			paths[count] = malloc(sizeof(char)*255);
 			strcpy(paths[count], file);
-			//printf("%s\n", file);
+			count++; //increment global count variable
 		}
 
 		//no need to close d (we can't, it is NULL!)
 		return;
-	}
-
-	//we have a directory, not a file, so check if its name
-	// matches the search term
-	if(strstr(file, search_term) != NULL) {
-		//printf("%s/\n", file);
 	}
 
 	//call recur_file_search for each file in d
@@ -198,9 +207,10 @@ void recur_file_search(char *file)
 					cur_file->d_name, \
 					strlen(cur_file->d_name) + 1);
 
+			//Allocate memory of global paths array then copy directory path
 			paths[count] = malloc(sizeof(char)*255);
 			strcpy(paths[count], next_file_str);
-			count++;
+			count++; //increment global count variable
 
 			//recurse on the file
 			recur_file_search(next_file_str);
