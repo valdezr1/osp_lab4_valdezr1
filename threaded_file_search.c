@@ -48,6 +48,11 @@ int main(int argc, char **argv)
 
 	pthread_create(&threads[0], NULL, thread_file_search, argv[2]);
 
+	if(pthread_join(threads[0], NULL)){
+		printf("Error in joining thread\n");
+	}
+
+
 	gettimeofday(&end, NULL);
 	printf("Time: %ld\n", (end.tv_sec * 1000000 + end.tv_usec)
 			- (start.tv_sec * 1000000 + start.tv_usec));
