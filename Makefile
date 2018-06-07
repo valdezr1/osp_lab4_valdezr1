@@ -1,8 +1,8 @@
 file_search:
-	gcc -o file_search file_search.c
+	gcc -o threaded_file_search threaded_file_search.c -pthread
 
 all:
-	gcc -o file_search file_search.c
+	gcc -o threaded_file_search threaded_file_search.c -pthread
 
 clean:
-	rm -f file_search
+	rm -f threaded_file_search
