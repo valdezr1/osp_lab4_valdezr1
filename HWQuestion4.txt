@@ -1,0 +1,32 @@
+4.
+	a. 
+		i. The performance of the multi-threaded version approach takes much longer than the original
+		version. The multi-threaded program has to recursively iterate through all child files/directories,
+		store them into an array, then revisit that array through 4 different threads reading their
+		calculated divided index. The first program simply recursivley iterates the files and prints 
+		as the recursion goes. This multithreaded approach takes the recursive time and additional time
+		to set up the threading and creating the threads themselves, thus making it take much longer
+		than the original approach.
+
+		ii. Yes, because the more you have to recursively go through the directory structure, the
+		longer it will take, but the threaded part of the implementation necessarily depend on the directory
+		structure but moreso on a global array. So, if this array was given prior to the recursion, then
+		the threaded portion would not be dependent on the directory structure (however, of course, the array 
+		is dependent on this recursion).
+		
+		iii. Yes the multi-thread approach could be improved and I am not using the 4 threads as efficiently
+		as possible. The reason for this is because the threads are only implemented when printing the global
+		array rather than used to visit the available paths during the recursion. I feel that there is a better
+		approach where threads could add to a global array and this would be used like a queue in where the threads
+		would add any children (similar to a graph traversal) to the queue until there were none to be added.
+		But this would require a set implementation as well to track which paths have been visited. This approach
+		seems extremely involved especially with using C as some or all of these STLs may not be readily available.
+  
+	b. One way would be to spawn a new thread each time the recursion was called when a directory was found. This would
+	allow for multiple threads to be spawned per directory search allowing for a more efficient recursive process.
+	Another way would be to set up a priority queue in where you track which are visited through set. The queue would
+	spawn a thread whenever one becomes available to use and each thread would globally add additional directories that
+	need to be searched for in the queue if the path has yet to be visited (cross reference with the set). 
+
+	c. Some of the information would be left in the Operating System's cache and this would allow for some of the
+	file accesses to be persistent and much faster than the prior runs.   
