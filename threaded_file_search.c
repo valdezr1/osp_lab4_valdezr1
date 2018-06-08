@@ -84,7 +84,7 @@ int main(int argc, char **argv)
 
 	struct range rFour;
 	rFour.start = rThree.end + increment;
-	rFour.end = count - 1;
+	rFour.end = count;
 
 	//Pointers used to allow structs to be passed in to the pthread_create function
 	struct range* rOnePtr = &rOne;
